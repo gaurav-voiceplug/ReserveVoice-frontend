@@ -1,5 +1,5 @@
-import React, { useEffect, useState, type JSX } from 'react';
-import { Calendar, MapPin, Filter, Users, Download, Star, X } from 'lucide-react';
+import { Calendar, Download, Filter, MapPin, Star, Users, X } from 'lucide-react';
+import { useEffect, useState, type JSX } from 'react';
 
 type ApiReservation = {
 	_id: string;

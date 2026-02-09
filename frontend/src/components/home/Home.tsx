@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Navbar from "../Navbar/Navbar";
 import { Outlet, useLocation } from "react-router-dom";
-import PrimaryHeader from "../header/PrimaryHeader";
 
 const Home = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
