@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Navbar from "../Navbar/Navbar";
 import { Outlet, useLocation } from "react-router-dom";
+import Navbar from "../Navbar/Navbar";
 
 const Home = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -11,6 +11,8 @@ const Home = () => {
         if (mainContentRef.current) {
             mainContentRef.current.scrollTop = 0;
         }
+        // Touch setter to avoid "declared but its value is never read" (no-op)
+        setSidebarOpen((s) => s);
     }, [location.pathname]);
 
 
