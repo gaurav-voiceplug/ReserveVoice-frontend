@@ -34,30 +34,30 @@ const Navbar: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
             {/* Nav Links */}
             <nav className="flex-1 px-4 py-4 space-y-2 mt-2">
                 {routes.filter(r => r.showInSidebar).map((link) => {
-                    // compute full sidebar path (routes are mounted under /home)
-                    const fullPath = link.path ? (link.path.startsWith('/') ? `/home${link.path}` : `/home/${link.path}`) : '/home';
-                    // active if exact match or a nested path under the route
-                    const isActive = location.pathname === fullPath || location.pathname.startsWith(fullPath + '/');
-                    return (
-                        <Link
-                            key={link.label}
-                            to={fullPath}
-                            className={`
-                                flex items-start gap-2 px-5 py-3 rounded-lg font-medium transition-colors
-                                ${isActive ? 'bg-[#e8e9f3] text-blue-700' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'}
-                                ${sidebarOpen ? '' : 'justify-center'}
-                            `}
-                            aria-current={isActive ? 'page' : undefined}
-                        >
-                            {link.icon && React.cloneElement(link.icon, {
-                                // force icon color to white when active, slate when not
-                                className: `w-5 h-5 ${isActive ? 'text-blue-700' : 'text-slate-400'} transition-colors`,
+                    // compute full sidebar path at root (no /home prefix)
+                    const fullPath = link.path ? (link.path.startsWith('/') ? `${link.path}` : `/${link.path}`) : '/';
+                     // active if exact match or a nested path under the route
+                     const isActive = location.pathname === fullPath || location.pathname.startsWith(fullPath + '/');
+                     return (
+                         <Link
+                             key={link.label}
+                             to={fullPath}
+                             className={`
+                                 flex items-start gap-2 px-5 py-3 rounded-lg font-medium transition-colors
+                                 ${isActive ? 'bg-[#e8e9f3] text-blue-700' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'}
+                                 ${sidebarOpen ? '' : 'justify-center'}
+                             `}
+                             aria-current={isActive ? 'page' : undefined}
+                         >
+                             {link.icon && React.cloneElement(link.icon, {
+                                 // force icon color to white when active, slate when not
+                                 className: `w-5 h-5 ${isActive ? 'text-blue-700' : 'text-slate-400'} transition-colors`,
                             })}
                             {sidebarOpen && <span className="text-sm">{link.label}</span>}
                         </Link>
-                    );
-                })}
-            </nav>
+                     );
+                 })}
+             </nav>
             {/* Help & Logout */}
             <div className="p-4 border-t border-[#e8e9f3] mt-auto flex flex-col gap-2">
                 <button

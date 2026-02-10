@@ -11,15 +11,17 @@ const AppRoutes: React.FC = () => {
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
 
-      {/* Protected base route - all app pages live under /home */}
+      {/* Protected base route mounted at "/" so children become "/orders", "/reservations", ... */}
       <Route
-        path="/home"
+        path="/"
         element={
           <ProtectedRoute>
             <Home />
           </ProtectedRoute>
         }
       >
+        {/* default when visiting "/" send to /orders */}
+        <Route index element={<Navigate to="orders" replace />} />
         {routes.map(({ path, element }) => (
           <Route
             key={path}
@@ -29,14 +31,14 @@ const AppRoutes: React.FC = () => {
         ))}
       </Route>
 
-      {/* Root redirect: go to /home when authenticated, else to /login */}
+      {/* Root (catch) redirect to /orders */}
       <Route
         path="/"
-        element={<Navigate to="/home" replace />}
+        element={<Navigate to="/orders" replace />}
       />
 
-      {/* Catch-all: if user hits unknown path, redirect to /home (protected) */}
-      <Route path="*" element={<Navigate to="/home" replace />} />
+      {/* Catch-all: redirect to /orders */}
+      <Route path="*" element={<Navigate to="/orders" replace />} />
     </Routes>
   );
 };

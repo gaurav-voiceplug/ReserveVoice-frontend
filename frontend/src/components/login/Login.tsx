@@ -36,7 +36,7 @@ const Login = () => {
                     // ensure auth context receives the token and refreshToken as part of the user object
                     login({ ...user, token, ...(refreshToken ? { refreshToken } : {}) });
                     showSnackbar('Login successful!', 'success');
-                    navigate('/home/orders');
+                    navigate('/orders');
                 } else {
                     showSnackbar(response.data.message || 'Sign in failed', 'error');
                 }
