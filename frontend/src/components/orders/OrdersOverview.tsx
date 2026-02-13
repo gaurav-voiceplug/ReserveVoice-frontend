@@ -661,7 +661,14 @@ export default function OrdersOverview(): JSX.Element {
                                 <div className="bg-primary/5 rounded-xl p-5 border border-[#e8e9f3] overflow-hidden">
                                     <div className="flex items-center gap-4">
                                         <div className="flex-shrink-0 h-14 w-14 rounded-full bg-blue-700 flex items-center justify-center text-white text-2xl font-black">
-                                            {(selected.customer || 'G').split(' ').map((s) => s[0]).slice(0, 2).join('')}
+                                            {((selected.customer ?? 'G')
+                                                .toString()
+                                                .trim()
+                                                .split(/\s+/)
+                                                .filter(Boolean)
+                                                .map(s => s.charAt(0).toUpperCase())
+                                                .slice(0, 2)
+                                                .join('')) || 'G'}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="text-lg font-bold text-[#0e101b] break-words">{selected.customer}</div>
@@ -703,7 +710,7 @@ export default function OrdersOverview(): JSX.Element {
                                                 onClick={handleRewind}
                                                 aria-label="Rewind 5s"
                                                 disabled={!audioSrc}
-                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-50 hover:bg-blue-100 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
                                             >
                                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6L11 18zM21 6v12l-8.5-6L21 6z" /></svg>
                                             </button>
@@ -711,7 +718,7 @@ export default function OrdersOverview(): JSX.Element {
                                                 onClick={togglePlay}
                                                 aria-label={isPlaying ? 'Pause' : 'Play'}
                                                 disabled={!audioSrc}
-                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-50 hover:bg-blue-100 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
                                             >
                                                 {isPlaying ? (
                                                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
@@ -723,7 +730,7 @@ export default function OrdersOverview(): JSX.Element {
                                                 onClick={handleForward}
                                                 aria-label="Forward 5s"
                                                 disabled={!audioSrc}
-                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-50 hover:bg-blue-100 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
                                             >
                                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13 18V6l8.5 6L13 18zM3 6v12l8.5-6L3 6z" /></svg>
                                             </button>
@@ -733,7 +740,7 @@ export default function OrdersOverview(): JSX.Element {
                                                 onClick={toggleMute}
                                                 aria-label={volume === 0 ? 'Unmute' : 'Mute'}
                                                 disabled={!audioSrc}
-                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-50 hover:bg-blue-100 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
                                             >
                                                 {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                                             </button>
@@ -746,7 +753,7 @@ export default function OrdersOverview(): JSX.Element {
                                                 onChange={(e) => setVolume(Number(e.target.value))}
                                                 aria-label="volume"
                                                 disabled={!audioSrc}
-                                                className={`w-28 h-1 ${audioSrc ? 'accent-blue-700 cursor-pointer' : 'accent-slate-400 cursor-not-allowed'}`}
+                                                className={`w-28 h-1 ${audioSrc ? 'accent-blue-600 cursor-pointer' : 'accent-slate-400 cursor-not-allowed'}`}
                                             />
                                         </div>
                                     </div>
