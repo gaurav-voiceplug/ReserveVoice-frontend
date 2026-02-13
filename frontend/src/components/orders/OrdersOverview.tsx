@@ -228,7 +228,7 @@ export default function OrdersOverview(): JSX.Element {
         const a = audioRef.current;
         if (!a) return;
         if (isPlaying) a.pause();
-        else a.play().catch(() => {});
+        else a.play().catch(() => { });
     }, [isPlaying]);
 
     const toggleMute = useCallback(() => {
@@ -484,79 +484,79 @@ export default function OrdersOverview(): JSX.Element {
                     {/* Tabs row: remove bottom border when Active */}
                     <div className="flex gap-8 border-b border-[#e8e9f3]">
                         <a
-                            className={`flex items-center gap-1 border-b-2 pb-1 font-bold text-base ${tab === 'Active' ? 'border-primary text-[#2437e0]' : 'border-transparent text-[#505795]'}`}
+                            className={`flex items-center gap-1 border-b-2 pb-2 font-bold text-sm ${tab === 'Active' ? 'border-primary text-[#2437e0]' : 'border-transparent text-[#505795]'}`}
                             href="#"
                             onClick={(e) => { e.preventDefault(); setTab('Active'); setSelected(null); }}
                         >
                             <span>Active</span>
-                            <span className="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold text-[#2437e0] bg-[#eef2ff]">
+                            <span className="ml-1 inline-flex items-center justify-center px-2 py-0 rounded-full text-sm font-bold text-[#2437e0] bg-[#eef2ff]">
                                 {active.length}
                             </span>
                         </a>
                         <a
-                            className={`flex items-center gap-1 border-b-2 pb-1 font-bold text-base ${tab === 'Completed' ? 'border-primary text-blue-700' : 'border-transparent text-[#505795]'}`}
+                            className={`flex items-center gap-1 border-b-2 pb-2 font-bold text-sm ${tab === 'Completed' ? 'border-primary text-blue-700' : 'border-transparent text-[#505795]'}`}
                             href="#"
                             onClick={(e) => { e.preventDefault(); setTab('Completed'); setSelected(null); }}
                         >
                             <span>Completed</span>
-                            <span className="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold text-[#0b875b] bg-[#ecfdf3]">
+                            <span className="ml-1 inline-flex items-center justify-center px-2 py-0 rounded-full text-sm font-bold text-[#0b875b] bg-[#ecfdf3]">
                                 {completed.length}
                             </span>
                         </a>
                     </div>
 
                     {/* Filters row: only render for Completed to avoid extra space when Active */}
-                        <div className="flex gap-3 flex-wrap">
-                            {/* ...completed-only filters... */}
-                            {loading ? (
-                                <>
-                                    <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                    <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                    <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                    <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                    <div className="flex-1" />
-                                    <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
-                                </>
-                            ) : (
-                                <>
-                                    <input
-                                        value={completedFilters.phoneNumber}
-                                        onChange={(e) => setCompletedFilters({ ...completedFilters, phoneNumber: e.target.value })}
-                                        placeholder="Phone number"
-                                        className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                    />
-                                    <input
-                                        value={completedFilters.callUuid}
-                                        onChange={(e) => setCompletedFilters({ ...completedFilters, callUuid: e.target.value })}
-                                        placeholder="Call UUID"
-                                        className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={completedFilters.dateStart ?? ''}
-                                        onChange={(e) => setCompletedFilters({ ...completedFilters, dateStart: e.target.value || null })}
-                                        className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={completedFilters.dateEnd ?? ''}
-                                        onChange={(e) => setCompletedFilters({ ...completedFilters, dateEnd: e.target.value || null })}
-                                        className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                    />
-                                    <div className="flex-1" />
-                                    <button
-                                        className="flex items-center gap-2 text-blue-700 text-sm font-bold cursor-pointer"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setCompletedFilters(defaultCompletedFilters);
-                                            fetchCompletedWithFilters(defaultCompletedFilters);
-                                        }}
-                                    >
-                                        Clear All
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                    <div className="flex gap-3 flex-wrap">
+                        {/* ...completed-only filters... */}
+                        {loading ? (
+                            <>
+                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="flex-1" />
+                                <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
+                            </>
+                        ) : (
+                            <>
+                                <input
+                                    value={completedFilters.phoneNumber}
+                                    onChange={(e) => setCompletedFilters({ ...completedFilters, phoneNumber: e.target.value })}
+                                    placeholder="Phone number"
+                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
+                                />
+                                <input
+                                    value={completedFilters.callUuid}
+                                    onChange={(e) => setCompletedFilters({ ...completedFilters, callUuid: e.target.value })}
+                                    placeholder="Call UUID"
+                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
+                                />
+                                <input
+                                    type="date"
+                                    value={completedFilters.dateStart ?? ''}
+                                    onChange={(e) => setCompletedFilters({ ...completedFilters, dateStart: e.target.value || null })}
+                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
+                                />
+                                <input
+                                    type="date"
+                                    value={completedFilters.dateEnd ?? ''}
+                                    onChange={(e) => setCompletedFilters({ ...completedFilters, dateEnd: e.target.value || null })}
+                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
+                                />
+                                <div className="flex-1" />
+                                <button
+                                    className="flex items-center gap-2 text-blue-700 text-sm font-bold cursor-pointer"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setCompletedFilters(defaultCompletedFilters);
+                                        fetchCompletedWithFilters(defaultCompletedFilters);
+                                    }}
+                                >
+                                    Clear All
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {/* Table (replaces card list) */}
@@ -675,68 +675,85 @@ export default function OrdersOverview(): JSX.Element {
                                 </div>
                             )}
 
-                            {/* audio player block (custom, VLC-style: time | progress | duration) */}
-                            <div className="w-full min-w-0 mb-3 ">
+                            {/* audio player block (always rendered; end timer starts at 0 until metadata loads) */}
+                            <div className="w-full min-w-0 mb-3">
                                 <audio ref={audioRef} preload="auto" className="hidden" />
-                                {audioLoading && <div className="h-22 w-full bg-blue-50 rounded animate-pulse" />}
                                 {audioError && <div className="text-xs text-red-600 mt-2">Error loading recording</div>}
-                                {audioSrc ? (
-                                    <div className="flex flex-col border border-[#e8e9f3] rounded-lg pt-6 p-3">
-                                        {/* single-line: [current time] [progress bar (flex-1)] [duration] */}
-                                        <div className="flex items-center gap-3">
-                                            <div className=" text-xs text-slate-900 text-right tabular-nums">{formatTime(curTime)}</div>
-                                            <div
-                                                className="flex-1 h-2 bg-blue-50 rounded-full cursor-pointer overflow-hidden"
-                                                onClick={(e) => {
-                                                    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                                                    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                                                    onSeek(pos * (duration || 0));
-                                                }}
-                                            >
-                                                <div className="h-full bg-blue-700 rounded-full" style={{ width: `${duration ? (curTime / duration) * 100 : 0}%` }} />
-                                            </div>
-                                            <div className=" text-xs text-slate-900 text-left tabular-nums">{formatTime(duration)}</div>
-                                        </div>
 
-                                        {/* controls row below: left buttons + right volume */}
-                                        <div className="flex items-center justify-between mt-3">
-                                            <div className="flex items-center gap-2">
-                                                <button onClick={handleRewind} aria-label="Rewind 5s" className="p-2 rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200  cursor-pointer">
-                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6L11 18zM21 6v12l-8.5-6L21 6z" /></svg>
-                                                </button>
-                                                <button onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'} className="p-2 rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200  cursor-pointer">
-                                                    {isPlaying ? (
-                                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
-                                                    ) : (
-                                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>
-                                                    )}
-                                                </button>
-                                                <button onClick={handleForward} aria-label="Forward 5s" className="p-2 rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200  cursor-pointer">
-                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13 18V6l8.5 6L13 18zM3 6v12l8.5-6L3 6z"/></svg>
-                                                </button>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    onClick={toggleMute}
-                                                    aria-label={volume === 0 ? 'Unmute' : 'Mute'}
-                                                    className="p-2 rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer"
-                                                >
-                                                    {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                                                </button>
-                                                <input
-                                                    type="range"
-                                                    min={0}
-                                                    max={100}
-                                                    step={1}
-                                                    value={volume}
-                                                    onChange={(e) => setVolume(Number(e.target.value))}
-                                                    aria-label="volume"
-                                                    className="w-28 h-1 accent-blue-700 cursor-pointer"
-                                                />
-                                            </div>
+                                {/* always-rendered player container; controls disabled until audioSrc is ready */}
+                                <div className="flex flex-col border border-[#e8e9f3] rounded-lg pt-6 p-3">
+                                    {/* single-line: [current time] [progress bar (flex-1)] [duration] */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-xs text-slate-900 text-right tabular-nums">{formatTime(curTime)}</div>
+                                        <div
+                                            className={`flex-1 h-2 rounded-full cursor-pointer overflow-hidden ${audioSrc ? 'bg-blue-50' : 'bg-gray-100'}`}
+                                            onClick={(e) => {
+                                                if (!audioSrc) return;
+                                                const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                                                const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                                                onSeek(pos * (duration || 0));
+                                            }}
+                                        >
+                                            <div className="h-full bg-blue-700 rounded-full" style={{ width: `${duration ? (curTime / duration) * 100 : 0}%` }} />
+                                        </div>
+                                        <div className="text-xs text-slate-900 text-left tabular-nums">{formatTime(duration)}</div>
+                                    </div>
+
+                                    {/* controls row below: left buttons + right volume */}
+                                    <div className="flex items-center justify-between mt-3">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={handleRewind}
+                                                aria-label="Rewind 5s"
+                                                disabled={!audioSrc}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                            >
+                                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6L11 18zM21 6v12l-8.5-6L21 6z" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={togglePlay}
+                                                aria-label={isPlaying ? 'Pause' : 'Play'}
+                                                disabled={!audioSrc}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                            >
+                                                {isPlaying ? (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
+                                                ) : (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z" /></svg>
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={handleForward}
+                                                aria-label="Forward 5s"
+                                                disabled={!audioSrc}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                            >
+                                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13 18V6l8.5 6L13 18zM3 6v12l8.5-6L3 6z" /></svg>
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={toggleMute}
+                                                aria-label={volume === 0 ? 'Unmute' : 'Mute'}
+                                                disabled={!audioSrc}
+                                                className={`p-2 rounded-md ${audioSrc ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer' : 'text-slate-400 bg-transparent cursor-not-allowed'}`}
+                                            >
+                                                {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                            </button>
+                                            <input
+                                                type="range"
+                                                min={0}
+                                                max={100}
+                                                step={1}
+                                                value={volume}
+                                                onChange={(e) => setVolume(Number(e.target.value))}
+                                                aria-label="volume"
+                                                disabled={!audioSrc}
+                                                className={`w-28 h-1 ${audioSrc ? 'accent-blue-700 cursor-pointer' : 'accent-slate-400 cursor-not-allowed'}`}
+                                            />
                                         </div>
                                     </div>
-                                ) : null}
+                                </div>
                             </div>
 
                             {/* items list */}
