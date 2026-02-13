@@ -151,7 +151,7 @@ export default function OrdersOverview(): JSX.Element {
 
     // --- new: resolved audio URL + load state ---
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
-    const [audioLoading, setAudioLoading] = useState(false);
+    // const [audioLoading, setAudioLoading] = useState(false);
     const [audioError, setAudioError] = useState<string | null>(null);
 
     // audio player state / refs / handlers
@@ -280,7 +280,6 @@ export default function OrdersOverview(): JSX.Element {
             setAudioSrc(null);
             setAudioError(null);
             if (!selected?.recording) return;
-            setAudioLoading(true);
             const url = buildRecordingUrl(selected.recording);
             try {
                 const headers = getAuthHeaders();
@@ -291,8 +290,6 @@ export default function OrdersOverview(): JSX.Element {
                 if (err?.name === 'AbortError') return;
                 setAudioError(err?.message ?? 'Failed to load recording');
                 setAudioSrc(null);
-            } finally {
-                setAudioLoading(false);
             }
         }
         fetchAudio();
