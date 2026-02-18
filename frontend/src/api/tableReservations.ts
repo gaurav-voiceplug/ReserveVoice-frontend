@@ -1,4 +1,3 @@
-import axios from 'axios';
 import axiosInstance from '../utils/axiosInstance';
 
 export type ApiReservation = Record<string, any>;
