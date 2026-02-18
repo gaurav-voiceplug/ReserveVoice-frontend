@@ -1,7 +1,12 @@
-import { Volume2, VolumeX, X } from 'lucide-react';
+import axios, { type CancelToken } from 'axios';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Volume2, VolumeX, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
-//import { Plyr } from 'plyr-react';
-//import 'plyr/dist/plyr.css';
+import client from '../../lib/axiosClient';
+import axiosInstance, { getAuthHeaders } from '../../utils/axiosInstance';
+import OrderTable from '../common/OrderTable';
+import CustomCalendar from './CustomCalendar';
+import { statusBadge, statusDot, statusLabel, statusText } from '../common/orderHelpers';
 
 type ApiOrder = Record<string, any>;
 
@@ -21,38 +26,17 @@ type Order = {
     raw?: ApiOrder;
 };
 
-const ACTIVE_URL = 'https://vplite-stg.voiceplug.ai/api/orders/getActiveOrder';
-const COMPLETED_URL = 'https://vplite-stg.voiceplug.ai/api/orders/getCompletedOrder';
-const VALIDATE_URL = 'https://vplite-stg.voiceplug.ai/api/users/validateToken';
-
-function getAuthHeaders(): Record<string, string> {
-    const rawToken = localStorage.getItem('token') || localStorage.getItem('authToken') || (import.meta.env?.VITE_API_TOKEN as string | undefined);
-    const rawRefresh = localStorage.getItem('refreshToken') || (import.meta.env?.VITE_REFRESH_TOKEN as string | undefined);
-    const token = rawToken && rawToken !== 'undefined' ? rawToken : undefined;
-    const refresh = rawRefresh && rawRefresh !== 'undefined' ? rawRefresh : undefined;
-    const headers: Record<string, string> = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-    };
-    if (token) headers['authorization'] = token;
-    if (refresh) headers['x-refresh-token'] = refresh;
-    return headers;
-}
-
-async function validateToken(headers: Record<string, string>, signal?: AbortSignal): Promise<boolean> {
-    const keys = Object.keys(headers || {});
-    const hasAuth = keys.some((k) => /authorization/i.test(k));
-    const hasRefresh = keys.some((k) => /x-?refresh-?token/i.test(k));
-    if (!hasAuth && !hasRefresh) return false;
-    try {
-        const res = await fetch(VALIDATE_URL, { method: 'POST', headers, signal });
-        if (!res.ok) return false;
-        const body = await res.json();
-        return !!body && (body.message === 'Token is valid' || !!body.user);
-    } catch (err: any) {
-        if (err && err.name === 'AbortError') throw err;
-        return false;
+function buildAxiosConfig(headers: Record<string, string>, cancelToken?: any) {
+    const cfg: Record<string, any> = { headers };
+    if (cancelToken) {
+        const maybe = cancelToken as any;
+        if (maybe && (maybe.aborted !== undefined || typeof maybe.aborted === 'boolean')) {
+            cfg.signal = cancelToken as AbortSignal;
+        } else {
+            cfg.cancelToken = cancelToken;
+        }
     }
+    return cfg;
 }
 
 function mapOrder(a: ApiOrder, status: Order['status']): Order {
@@ -83,59 +67,6 @@ function mapOrder(a: ApiOrder, status: Order['status']): Order {
         recording: a.recording,
         raw: a,
     };
-}
-
-function statusBadge(status?: string) {
-    // return background classes matching the screenshot (no dark variants)
-    switch ((status || '').toLowerCase()) {
-        case 'active':
-            return 'bg-amber-50';
-        case 'completed':
-            return 'bg-green-50';
-        case 'cancelled':
-            return 'bg-red-50';
-        default:
-            return 'bg-gray-50';
-    }
-}
-
-// new: text color class for the chip label (matches Clear All button color/weight in screenshot)
-function statusText(status?: string) {
-    switch ((status || '').toLowerCase()) {
-        case 'active':
-            return 'text-amber-600';
-        case 'completed':
-            return 'text-green-600';
-        case 'cancelled':
-            return 'text-red-600';
-        default:
-            return 'text-gray-600';
-    }
-}
-
-// new: dot color for the chip
-function statusDot(status?: string) {
-    switch ((status || '').toLowerCase()) {
-        case 'active':
-            return 'bg-amber-600';
-        case 'completed':
-            return 'bg-green-600';
-        case 'cancelled':
-            return 'bg-red-600';
-        default:
-            return 'bg-gray-600';
-    }
-}
-
-// new: friendly uppercase label for the chip
-function statusLabel(status?: string) {
-    if (!status) return 'UNKNOWN';
-    const s = status.toString().toLowerCase();
-    if (s === 'active') return 'ACTIVE';
-    if (s === 'completed') return 'COMPLETED';
-    if (s === 'cancelled') return 'CANCELLED';
-    if (s === 'arriving' || s === 'arriving soon') return 'ARRIVING SOON';
-    return status.toUpperCase();
 }
 
 // localStorage keys used by auth prefetch
@@ -275,25 +206,37 @@ export default function OrdersOverview(): JSX.Element {
 
     // fetch and resolve audio URL (GET so we follow redirects / get final URL)
     useEffect(() => {
-        const ac = new AbortController();
-        async function fetchAudio() {
-            setAudioSrc(null);
-            setAudioError(null);
-            if (!selected?.recording) return;
-            const url = buildRecordingUrl(selected.recording);
-            try {
-                const headers = getAuthHeaders();
-                const res = await fetch(url, { method: 'GET', headers, signal: ac.signal });
-                if (!res.ok && res.status !== 304) throw new Error(`Audio ${res.status}`);
-                setAudioSrc(res.url || url);
-            } catch (err: any) {
-                if (err?.name === 'AbortError') return;
+        const source = axios.CancelToken.source();
+        let blobUrl: string | null = null;
+        setAudioSrc(null);
+        setAudioError(null);
+        if (!selected?.recording) return;
+        const url = buildRecordingUrl(selected.recording);
+        const headers = getAuthHeaders();
+
+        axiosInstance
+            .get(url, {
+                headers,
+                cancelToken: source.token,
+                responseType: 'blob',
+            })
+            .then((res) => {
+                if (res.status >= 400) {
+                    throw new Error(`Audio ${res.status}`);
+                }
+                blobUrl = URL.createObjectURL(res.data);
+                setAudioSrc(blobUrl);
+            })
+            .catch((err) => {
+                if (axios.isCancel(err)) return;
                 setAudioError(err?.message ?? 'Failed to load recording');
                 setAudioSrc(null);
-            }
-        }
-        fetchAudio();
-        return () => ac.abort();
+            });
+
+        return () => {
+            source.cancel('audio effect cleanup');
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        };
     }, [selected?.recording]);
 
     // new: completed filters state matching required payload
@@ -306,22 +249,58 @@ export default function OrdersOverview(): JSX.Element {
     };
     const defaultCompletedFilters: CompletedFilters = { page: 0, callUuid: '', dateStart: null, dateEnd: null, phoneNumber: '' };
     const [completedFilters, setCompletedFilters] = useState<CompletedFilters>(defaultCompletedFilters);
+    // SIMPLE RANGE CALENDAR STATE (FIRST CLICK = START, SECOND CLICK = END)
+    const [calOpen, setCalOpen] = useState(false);
+    const [viewMonth, setViewMonth] = useState<Date>(() => new Date());
+    const [tmpStart, setTmpStart] = useState<string | null>(completedFilters.dateStart);
+    const [tmpEnd, setTmpEnd] = useState<string | null>(completedFilters.dateEnd);
+
+    const applyRange = (startIso: string | null, endIso: string | null) => {
+        setCompletedFilters((p) => ({ ...p, dateStart: startIso, dateEnd: endIso }));
+        if (tab === 'Completed') fetchCompletedWithFilters({ ...completedFilters, dateStart: startIso, dateEnd: endIso });
+    };
+
+    // fetch and resolve audio URL (GET so we follow redirects / download blob)
+    useEffect(() => {
+        const source = axios.CancelToken.source();
+        let blobUrl: string | null = null;
+        setAudioSrc(null);
+        setAudioError(null);
+        if (!selected?.recording) return;
+        const url = buildRecordingUrl(selected.recording);
+        const headers = getAuthHeaders();
+
+        axiosInstance
+            .get(url, {
+                headers,
+                cancelToken: source.token,
+                responseType: 'blob',
+            })
+            .then((res) => {
+                if (res.status >= 400) {
+                    throw new Error(`Audio ${res.status}`);
+                }
+                blobUrl = URL.createObjectURL(res.data);
+                setAudioSrc(blobUrl);
+            })
+            .catch((err) => {
+                if (axios.isCancel(err)) return;
+                setAudioError(err?.message ?? 'Failed to load recording');
+                setAudioSrc(null);
+            });
+
+        return () => {
+            source.cancel('audio effect cleanup');
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        };
+    }, [selected?.recording]);
 
     // new: fetch completed orders with JSON payload (used at mount and when applying filters)
-    async function fetchCompletedWithFilters(filters: CompletedFilters, signal?: AbortSignal) {
-        setLoading(true);
-        setError(null);
-        try {
+    function fetchCompletedWithFilters(filters: CompletedFilters, cancelToken?: CancelToken | AbortSignal) {
+            setLoading(true);
+            setError(null);
+    
             const headers = getAuthHeaders();
-            const valid = await validateToken(headers, signal);
-            if (!valid) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refreshToken');
-                setError('Session expired or not authenticated. Please sign in again.');
-                setCompleted([]);
-                return;
-            }
-
             const body = {
                 page: filters.page,
                 callUuid: filters.callUuid || '',
@@ -329,36 +308,62 @@ export default function OrdersOverview(): JSX.Element {
                 dateEnd: filters.dateEnd ?? null,
                 phoneNumber: filters.phoneNumber ?? '',
             };
-
-            const res = await fetch(COMPLETED_URL, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(body),
-                signal,
-            });
-
-            if (!res.ok) throw new Error(`Completed HTTP ${res.status}`);
-            const json = await res.json();
-            const array: ApiOrder[] = Array.isArray(json) ? json : (json?.data ?? json?.result ?? []);
-            const mapped = (array || []).map((a) => mapOrder(a, 'Completed'));
-            setCompleted(mapped);
-        } catch (err: any) {
-            if (err && err.name === 'AbortError') return;
-            setError(err?.message ?? 'Failed to load completed orders');
-        } finally {
-            setLoading(false);
+            const cfg = buildAxiosConfig(headers, cancelToken);
+    
+            return client.post('/orders/getCompletedOrder', body, cfg)
+                .then((res) => {
+                    const json = res.data;
+                    const array: ApiOrder[] = Array.isArray(json) ? json : (json?.data ?? json?.result ?? []);
+                    const mapped = (array || []).map((a) => mapOrder(a, 'Completed'));
+                    setCompleted(mapped);
+                })
+                .catch((err) => {
+                    if (axios.isCancel(err)) return;
+                    if (err?.response?.status === 401) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('refreshToken');
+                        setError('Session expired or not authenticated. Please sign in again.');
+                        setCompleted([]);
+                        return;
+                    }
+                    setError(err?.message ?? 'Failed to load completed orders');
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
         }
-    }
 
     useEffect(() => {
-        const ac = new AbortController();
-        async function fetchAll() {
-            try {
-                setLoading(true);
-                setError(null);
-                const headers = getAuthHeaders();
-                const valid = await validateToken(headers, ac.signal);
-                if (!valid) {
+        const source = axios.CancelToken.source();
+        setLoading(true);
+        setError(null);
+
+        const headers = getAuthHeaders();
+        const actPromise = axiosInstance
+            .post('/orders/getActiveOrder', {}, { headers, cancelToken: source.token })
+            .then((r) => (r.status >= 400 ? Promise.reject(new Error(`Active HTTP ${r.status}`)) : (Array.isArray(r.data) ? r.data : (r.data?.data ?? r.data?.result ?? []))));
+        const compBody = {
+            page: completedFilters.page,
+            callUuid: completedFilters.callUuid || '',
+            dateStart: completedFilters.dateStart ?? null,
+            dateEnd: completedFilters.dateEnd ?? null,
+            phoneNumber: completedFilters.phoneNumber ?? '',
+        };
+        const compPromise = axiosInstance
+            .post('/orders/getCompletedOrder', compBody, { headers, cancelToken: source.token })
+            .then((r) => (r.status >= 400 ? Promise.reject(new Error(`Completed HTTP ${r.status}`)) : (Array.isArray(r.data) ? r.data : (r.data?.data ?? r.data?.result ?? []))));
+        Promise.all([actPromise, compPromise])
+            .then((res) => {
+                const [actArray, compArray] = res as [ApiOrder[], ApiOrder[]];
+                const mappedActive = (actArray || []).map((a) => mapOrder(a, 'Active'));
+                const mappedCompleted = (compArray || []).map((a) => mapOrder(a, 'Completed'));
+                setActive(mappedActive);
+                setCompleted(mappedCompleted);
+                setSelected(null);
+            })
+            .catch((err) => {
+                if (axios.isCancel(err)) return;
+                if (err?.response?.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('refreshToken');
                     setError('Session expired or not authenticated. Please sign in again.');
@@ -367,50 +372,12 @@ export default function OrdersOverview(): JSX.Element {
                     setSelected(null);
                     return;
                 }
-
-                // fetch active and completed (completed using the filters payload)
-                const actPromise = fetch(ACTIVE_URL, { method: 'POST', headers, signal: ac.signal })
-                    .then(async (r) => {
-                        if (!r.ok) throw new Error(`Active HTTP ${r.status}`);
-                        const jb = await r.json();
-                        return Array.isArray(jb) ? jb : (jb?.data ?? jb?.result ?? []);
-                    });
-
-                const compPromise = fetch(COMPLETED_URL, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({
-                        page: completedFilters.page,
-                        callUuid: completedFilters.callUuid || '',
-                        dateStart: completedFilters.dateStart ?? null,
-                        dateEnd: completedFilters.dateEnd ?? null,
-                        phoneNumber: completedFilters.phoneNumber ?? '',
-                    }),
-                    signal: ac.signal,
-                }).then(async (r) => {
-                    if (!r.ok) throw new Error(`Completed HTTP ${r.status}`);
-                    const jb = await r.json();
-                    return Array.isArray(jb) ? jb : (jb?.data ?? jb?.result ?? []);
-                });
-
-                const [actArray, compArray] = await Promise.all([actPromise, compPromise]) as [ApiOrder[], ApiOrder[]];
-
-                const mappedActive = (actArray || []).map((a) => mapOrder(a, 'Active'));
-                const mappedCompleted = (compArray || []).map((a) => mapOrder(a, 'Completed'));
-
-                setActive(mappedActive);
-                setCompleted(mappedCompleted);
-                // do not auto-open any order on initial load
-                setSelected(null);
-
-            } catch (err: any) {
-                if (err?.name !== 'AbortError') setError(err?.message ?? 'Failed to load orders');
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchAll();
-        return () => ac.abort();
+                setError(err?.message ?? 'Failed to load orders');
+            })
+            .finally(() => setLoading(false));
+        return () => {
+            source.cancel('component unmounted');
+        };
     }, []); // run once on mount
 
     // new: debounce completed-filters changes (500ms) and auto-fetch when on Completed tab
@@ -429,13 +396,13 @@ export default function OrdersOverview(): JSX.Element {
             return;
         }
 
-        const ac = new AbortController();
+        const source = axios.CancelToken.source();
         const id = setTimeout(() => {
-            fetchCompletedWithFilters(completedFilters, ac.signal);
+            fetchCompletedWithFilters(completedFilters, source.token);
         }, 500);
         return () => {
             clearTimeout(id);
-            ac.abort();
+            source.cancel('debounce cleanup');
         };
     }, [completedFilters, tab, completed.length]);
 
@@ -503,46 +470,58 @@ export default function OrdersOverview(): JSX.Element {
                     </div>
 
                     {/* Filters row: only render for Completed to avoid extra space when Active */}
-                    <div className="flex gap-3 flex-wrap">
+                    <div className="flex gap-3 flex-wrap items-center">
                         {/* ...completed-only filters... */}
                         {loading ? (
                             <>
-                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                <div className="h-9 w-40 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                                <div className="h-9 w-40 bg-gray-200 rounded-full animate-pulse"></div>
                                 <div className="flex-1" />
-                                <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-9 w-24 bg-gray-200 rounded-full animate-pulse"></div>
                             </>
                         ) : (
                             <>
+
+                                {/* DATE RANGE: pill-style control */}
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setCalOpen((s) => !s); setViewMonth(new Date(tmpStart ?? tmpEnd ?? new Date().toISOString())); }}
+                                        className="h-9 px-3 rounded-full bg-[#f3f4f8] text-sm text-[#0e101b] flex items-center gap-2 border border-transparent shadow-sm"
+                                    >
+                                        <CalendarIcon className="w-4 h-4 text-[#505075]" />
+                                        <span className="text-sm font-medium">
+                                            {tmpStart ? format(new Date(tmpStart), 'MMM d') : 'Today, Oct 24'}
+                                            <span className="mx-2 text-gray-400">•</span>
+                                            <span className="text-gray-600">{tmpEnd ? format(new Date(tmpEnd), 'MMM d') : 'All'}</span>
+                                        </span>
+                                    </button>
+                                    {calOpen && (
+                                        <div>
+                                            <CustomCalendar
+                                                startIso={tmpStart}
+                                                endIso={tmpEnd}
+                                                onSelect={(s, e) => {
+                                                    setTmpStart(s);
+                                                    setTmpEnd(e);
+                                                    applyRange(s, e);
+                                                }}
+                                                onClose={() => setCalOpen(false)}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                                 <input
                                     value={completedFilters.phoneNumber}
                                     onChange={(e) => setCompletedFilters({ ...completedFilters, phoneNumber: e.target.value })}
                                     placeholder="Phone number"
                                     className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
                                 />
-                                <input
-                                    value={completedFilters.callUuid}
-                                    onChange={(e) => setCompletedFilters({ ...completedFilters, callUuid: e.target.value })}
-                                    placeholder="Call UUID"
-                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                />
-                                <input
-                                    type="date"
-                                    value={completedFilters.dateStart ?? ''}
-                                    onChange={(e) => setCompletedFilters({ ...completedFilters, dateStart: e.target.value || null })}
-                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                />
-                                <input
-                                    type="date"
-                                    value={completedFilters.dateEnd ?? ''}
-                                    onChange={(e) => setCompletedFilters({ ...completedFilters, dateEnd: e.target.value || null })}
-                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
-                                />
-                                <div className="flex-1" />
+                                 <div className="flex-1" />
                                 <button
-                                    className="flex items-center gap-2 text-blue-700 text-sm font-bold cursor-pointer"
+                                    className="text-blue-600 text-sm font-semibold underline-offset-2 hover:underline"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         setCompletedFilters(defaultCompletedFilters);
@@ -556,81 +535,14 @@ export default function OrdersOverview(): JSX.Element {
                     </div>
                 </div>
 
-                {/* Table (replaces card list) */}
-                <div className="flex-1 @container">
-                    <div className="flex overflow-hidden rounded-xl border border-[#d1d3e6] bg-white shadow-sm">
-                        <table className="min-w-full text-left">
-                            <thead>
-                                <tr className="bg-[#f8f9fb] border-b border-[#d1d3e6]">
-                                    <th className="px-6 py-4 text-[#0e101b] text-xs font-bold uppercase tracking-wider w-1/4">Date/Time</th>
-                                    <th className="px-6 py-4 text-[#0e101b] text-xs font-bold uppercase tracking-wider w-1/6">Customer</th>
-                                    <th className="px-6 py-4 text-[#0e101b] text-xs font-bold uppercase tracking-wider w-1/12">Phone</th>
-                                    <th className="px-6 py-4 text-[#0e101b] text-xs font-bold uppercase tracking-wider w-1/12">Status</th>
-                                    <th className="px-6 py-4 text-[#0e101b] text-xs font-bold uppercase tracking-wider w-1/2">Items</th>
-                                    {/* <th className="px-6 py-4 text-[#0e101b] text-xs font-bold uppercase tracking-wider w-1/12">Order #</th> */}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#d1d3e6]">
-                                {error ? (
-                                    <tr><td colSpan={6} className="px-6 py-6 text-center text-sm text-red-600">Error: {error}</td></tr>
-                                ) : loading ? (
-                                    // skeleton table rows
-                                    <>
-                                        {Array.from({ length: 6 }).map((_, i) => (
-                                            <tr key={`skeleton-${i}`}>
-                                                <td className="px-6 py-5">
-                                                    <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </>
-                                ) : shown.length === 0 ? (
-                                    <tr><td colSpan={6} className="px-6 py-6 text-center text-sm text-[#505795]">No orders</td></tr>
-                                ) : (
-                                    shown.map((o) => {
-                                        const isSelected = selected?.id === o.id;
-                                        const itemsShort = (o.items || []).map(it => `${it.qty}× ${it.name}`).join(', ');
-                                        return (
-                                            <tr
-                                                key={o.id}
-                                                onClick={() => setSelected(o)}
-                                                className={`hover:bg-primary/5 cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 border-l-4 border-l-blue-700' : ''}`}
-                                            >
-                                                <td className="px-6 py-5 text-sm font-medium text-[#0e101b]">{o.dateTime}</td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-semibold text-[#0e101b]">{o.customer}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 text-sm text-[#505795]">{o.phone ?? ''}</td>
-                                                <td className="px-6 py-5">
-                                                    <div className={`flex items-center gap-1.5 ${statusText(o.status)} ${statusBadge(o.status)} px-2 py-1 rounded-full w-fit`}>
-                                                        <span className={`size-2 w-2 h-2 rounded-full ${statusDot(o.status)}`} />
-                                                        <span className="text-xs font-bold uppercase">{statusLabel(o.status)}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 text-sm text-[#505795] italic">{itemsShort || (o.transcription ? `${o.transcription.substring(0, 60)}…` : 'N/A')}</td>
-                                                {/* <td className="px-6 py-5 text-sm text-[#505795] italic">{o.orderNo ?? '-'}</td> */}
-                                            </tr>
-                                        );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                {/* Table (replaced by reusable component) */}
+                <OrderTable
+                    orders={shown}
+                    loading={loading}
+                    error={error}
+                    selectedId={selected?.id ?? null}
+                    onSelect={(o) => setSelected(o)}
+                />
 
             </div>
 

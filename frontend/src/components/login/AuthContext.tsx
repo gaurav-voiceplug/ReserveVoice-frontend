@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getAuthHeaders } from '../../utils/axiosInstance';
+import { validateTokenApi } from '../../utils/authApi';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -6,7 +8,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session on first load
   useEffect(() => {
     const token = localStorage.getItem('token');
     const refreshToken = localStorage.getItem('refreshToken');
@@ -15,18 +16,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (token && userData) {
       try {
         const parsed = JSON.parse(userData);
-        // include refresh token in restored user object if present
         const userInfo = { ...parsed, token, ...(refreshToken ? { refreshToken } : {}) };
-        setUser(userInfo);
+        const headers = getAuthHeaders();
+        validateTokenApi(headers)
+          .then((valid) => {
+            if (valid) setUser(userInfo);
+            else logout();
+          })
+          .catch(() => logout())
+          .finally(() => setLoading(false));
+        return;
       } catch (e) {
-        console.warn('Invalid user session');
         logout();
       }
     }
     setLoading(false);
   }, []);
 
-  // --- added: endpoints used for prefetching orders ---
   const PREFETCH_ACTIVE_KEY = 'prefetchedActiveOrders';
   const PREFETCH_COMPLETED_KEY = 'prefetchedCompletedOrders';
   const ACTIVE_URL = 'https://vplite-stg.voiceplug.ai/api/orders/getActiveOrder';
@@ -63,13 +69,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const login = (data: UserDetails) => {
-    // persist token, refresh token (if present) and user info
     if (data.token) localStorage.setItem('token', data.token);
     if ((data as any).refreshToken) localStorage.setItem('refreshToken', (data as any).refreshToken);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
-
-    // best-effort prefetch
     try { prefetchOrders((data as any).token, (data as any).refreshToken); } catch {}
   };
 

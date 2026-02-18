@@ -4,6 +4,7 @@ import ReservationsOverview from './components/reservations/ReservationsOverview
 import OrdersOverview from './components/orders/OrdersOverview';
 
 import { Calendar as CalendarIcon, CreditCard, MapPinCheck, Box } from 'lucide-react';
+import TableReservation from './components/orders/TableReservation';
 
 export const routes = [
     {
@@ -15,7 +16,7 @@ export const routes = [
     },
     {
         path: 'reservations',
-        element: <ReservationsOverview />,
+        element: <TableReservation />,
         label: 'Reservations',
         icon: <CalendarIcon className="w-5 h-5 text-black" />,
         showInSidebar: true,
