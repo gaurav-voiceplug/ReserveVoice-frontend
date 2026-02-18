@@ -251,7 +251,7 @@ export default function OrdersOverview(): JSX.Element {
     const [completedFilters, setCompletedFilters] = useState<CompletedFilters>(defaultCompletedFilters);
     // SIMPLE RANGE CALENDAR STATE (FIRST CLICK = START, SECOND CLICK = END)
     const [calOpen, setCalOpen] = useState(false);
-    const [viewMonth, setViewMonth] = useState<Date>(() => new Date());
+    const [, setViewMonth] = useState<Date>(() => new Date());
     const [tmpStart, setTmpStart] = useState<string | null>(completedFilters.dateStart);
     const [tmpEnd, setTmpEnd] = useState<string | null>(completedFilters.dateEnd);
 

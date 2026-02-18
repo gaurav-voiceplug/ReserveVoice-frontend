@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef, useCallback, type JSX } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Volume2, VolumeX, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { fetchAcknowledgedTableReservations, fetchActiveTableReservations, type ApiReservation } from '../../api/tableReservations';
 import axiosInstance, { getAuthHeaders } from '../../utils/axiosInstance';
-import { fetchActiveTableReservations, fetchAcknowledgedTableReservations, type ApiReservation } from '../../api/tableReservations';
 import ReservationTable from '../common/ReservationTable';
 import CustomCalendar from './CustomCalendar';
 

@@ -1,9 +1,8 @@
 import FAQ from './components/FAQs/FAQ';
 import LocationManagement from './components/location/LocationManagement';
-import ReservationsOverview from './components/reservations/ReservationsOverview';
 import OrdersOverview from './components/orders/OrdersOverview';
 
-import { Calendar as CalendarIcon, CreditCard, MapPinCheck, Box } from 'lucide-react';
+import { Box, Calendar as CalendarIcon, CreditCard, MapPinCheck } from 'lucide-react';
 import TableReservation from './components/orders/TableReservation';
 
 export const routes = [
