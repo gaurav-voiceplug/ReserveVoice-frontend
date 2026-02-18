@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   format,
   startOfWeek,
@@ -25,12 +25,33 @@ export default function CustomCalendar({ startIso, endIso, onSelect, onClose }: 
   const [currentMonth, setCurrentMonth] = useState<Date>(parseIso(startIso) ?? new Date());
   const [selStart, setSelStart] = useState<Date | null>(parseIso(startIso));
   const [selEnd, setSelEnd] = useState<Date | null>(parseIso(endIso));
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setSelStart(parseIso(startIso));
     setSelEnd(parseIso(endIso));
     if (startIso) setCurrentMonth(parseIso(startIso) as Date);
   }, [startIso, endIso]);
+
+  useEffect(() => {
+    function onDocPointer(e: MouseEvent | TouchEvent) {
+      const tgt = e.target as Node | null;
+      if (rootRef.current && tgt && !rootRef.current.contains(tgt)) {
+        onClose();
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('mousedown', onDocPointer);
+    document.addEventListener('touchstart', onDocPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocPointer);
+      document.removeEventListener('touchstart', onDocPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
 
   const getCalendarDates = () => {
     const start = startOfWeek(startOfMonth(currentMonth));
@@ -45,13 +66,11 @@ export default function CustomCalendar({ startIso, endIso, onSelect, onClose }: 
   };
 
   const onDayClick = (d: Date) => {
-    // simple range selection: first click = start, second = end (swap if needed)
     if (!selStart || (selStart && selEnd)) {
       setSelStart(d);
       setSelEnd(null);
       return;
     }
-    // second click
     if (isAfter(selStart, d)) {
       setSelEnd(selStart);
       setSelStart(d);
@@ -81,7 +100,7 @@ export default function CustomCalendar({ startIso, endIso, onSelect, onClose }: 
   };
 
   return (
-    <div className="absolute z-50 mt-2 w-[300px] bg-white border border-[#e8e9f3] rounded-lg shadow-lg p-3">
+    <div ref={rootRef} className="absolute z-50 mt-2 w-[300px] bg-white border border-[#e8e9f3] rounded-lg shadow-lg p-3">
       <div className="flex items-center justify-between mb-2">
         <button onClick={() => setCurrentMonth(m => subMonths(m, 1))} className="p-1">‹</button>
         <div className="text-sm font-medium">{format(currentMonth, 'MMMM yyyy')}</div>
@@ -118,7 +137,7 @@ export default function CustomCalendar({ startIso, endIso, onSelect, onClose }: 
       <div className="flex items-center justify-between mt-3">
         <button className="text-sm text-blue-700" onClick={handleClear}>Clear</button>
         <div className="flex gap-2">
-          <button className="px-3 py-1 bg-gray-100 rounded text-sm" onClick={onClose}>Close</button>
+          {/* <button className="px-3 py-1 bg-gray-100 rounded text-sm" onClick={onClose}>Close</button> */}
           <button className="px-3 py-1 bg-blue-700 text-white rounded text-sm" onClick={handleDone}>Done</button>
         </div>
       </div>

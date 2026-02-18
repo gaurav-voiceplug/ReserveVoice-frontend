@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import client from '../../lib/axiosClient';
 import axiosInstance, { getAuthHeaders } from '../../utils/axiosInstance';
 import OrderTable from '../common/OrderTable';
-import CustomCalendar from './CustomCalendar';
+import CustomCalendar from '../common/CustomCalendar';
+import LocationFilter from '../common/LocationFilter';
 import { statusBadge, statusDot, statusLabel, statusText } from '../common/orderHelpers';
 
 type ApiOrder = Record<string, any>;
@@ -246,8 +247,9 @@ export default function OrdersOverview(): JSX.Element {
         dateStart: string | null;
         dateEnd: string | null;
         phoneNumber: string;
+        locationIds?: string[];
     };
-    const defaultCompletedFilters: CompletedFilters = { page: 0, callUuid: '', dateStart: null, dateEnd: null, phoneNumber: '' };
+    const defaultCompletedFilters: CompletedFilters = { page: 0, callUuid: '', dateStart: null, dateEnd: null, phoneNumber: '', locationIds: [] };
     const [completedFilters, setCompletedFilters] = useState<CompletedFilters>(defaultCompletedFilters);
     // SIMPLE RANGE CALENDAR STATE (FIRST CLICK = START, SECOND CLICK = END)
     const [calOpen, setCalOpen] = useState(false);
@@ -307,6 +309,7 @@ export default function OrdersOverview(): JSX.Element {
                 dateStart: filters.dateStart ?? null,
                 dateEnd: filters.dateEnd ?? null,
                 phoneNumber: filters.phoneNumber ?? '',
+                locationIds: filters.locationIds ?? [],
             };
             const cfg = buildAxiosConfig(headers, cancelToken);
     
@@ -348,6 +351,7 @@ export default function OrdersOverview(): JSX.Element {
             dateStart: completedFilters.dateStart ?? null,
             dateEnd: completedFilters.dateEnd ?? null,
             phoneNumber: completedFilters.phoneNumber ?? '',
+            locationIds: completedFilters.locationIds ?? [],
         };
         const compPromise = axiosInstance
             .post('/orders/getCompletedOrder', compBody, { headers, cancelToken: source.token })
@@ -470,7 +474,7 @@ export default function OrdersOverview(): JSX.Element {
                     </div>
 
                     {/* Filters row: only render for Completed to avoid extra space when Active */}
-                    <div className="flex gap-3 flex-wrap items-center">
+                    <div className="flex gap-5 flex-wrap items-center">
                         {/* ...completed-only filters... */}
                         {loading ? (
                             <>
@@ -513,23 +517,27 @@ export default function OrdersOverview(): JSX.Element {
                                         </div>
                                     )}
                                 </div>
-                                <input
-                                    value={completedFilters.phoneNumber}
-                                    onChange={(e) => setCompletedFilters({ ...completedFilters, phoneNumber: e.target.value })}
-                                    placeholder="Phone number"
-                                    className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
+                                <LocationFilter
+                                    value={completedFilters.locationIds ?? []}
+                                    onChange={(ids) => setCompletedFilters((p) => ({ ...p, locationIds: ids }))}
                                 />
+                                 <input
+                                     value={completedFilters.phoneNumber}
+                                     onChange={(e) => setCompletedFilters({ ...completedFilters, phoneNumber: e.target.value })}
+                                     placeholder="Phone number"
+                                     className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]"
+                                 />
                                  <div className="flex-1" />
-                                <button
-                                    className="text-blue-600 text-sm font-semibold underline-offset-2 hover:underline"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setCompletedFilters(defaultCompletedFilters);
-                                        fetchCompletedWithFilters(defaultCompletedFilters);
-                                    }}
-                                >
-                                    Clear All
-                                </button>
+                                 <button
+                                     className="text-blue-600 text-sm font-semibold underline-offset-2 hover:underline"
+                                     onClick={(e) => {
+                                         e.preventDefault();
+                                         setCompletedFilters(defaultCompletedFilters);
+                                         fetchCompletedWithFilters(defaultCompletedFilters);
+                                     }}
+                                 >
+                                     Clear All
+                                 </button>
                             </>
                         )}
                     </div>

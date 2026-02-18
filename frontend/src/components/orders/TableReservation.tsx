@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import { fetchAcknowledgedTableReservations, fetchActiveTableReservations, type ApiReservation } from '../../api/tableReservations';
 import axiosInstance, { getAuthHeaders } from '../../utils/axiosInstance';
 import ReservationTable from '../common/ReservationTable';
-import CustomCalendar from './CustomCalendar';
+import LocationFilter from '../common/LocationFilter';
+import CustomCalendar from '../common/CustomCalendar';
 
 type Reservation = {
 	id: string;
@@ -48,6 +49,7 @@ export default function TableReservation(): JSX.Element {
 	const [error, setError] = useState<string | null>(null);
 	const [tab, setTab] = useState<'Active' | 'Acknowledged'>('Active');
 	const [selected, setSelected] = useState<Reservation | null>(null);
+	const [locationIds, setLocationIds] = useState<string[]>([]);
 
 	const [audioSrc, setAudioSrc] = useState<string | null>(null);
 	const [audioError, setAudioError] = useState<string | null>(null);
@@ -150,9 +152,10 @@ export default function TableReservation(): JSX.Element {
 		setLoading(true);
 		setError(null);
 		const headers = getAuthHeaders();
+		const body = { locationIds };
 		Promise.all([
-			fetchActiveTableReservations(headers, source.token),
-			fetchAcknowledgedTableReservations(headers, source.token),
+			fetchActiveTableReservations(headers, source.token, body),
+			fetchAcknowledgedTableReservations(headers, source.token, body),
 		])
 		.then(([act, ackd]) => {
 			setActive((act || []).map(mapReservation));
@@ -209,7 +212,7 @@ export default function TableReservation(): JSX.Element {
 				<div className="flex flex-wrap justify-between items-end gap-3 mb-2">
 					<div className="flex flex-col gap-1">
 						<h1 className="text-[#0e101b] text-4xl font-black">Table Reservations</h1>
-						<p className="text-[#505795] text-base font-semibold">{`${list.length} ${tab.toLowerCase()}`}</p>
+						{/* <p className="text-[#505795] text-base font-semibold">{`${list.length} ${tab.toLowerCase()}`}</p> */}
 					</div>
 					<div />
 				</div>
@@ -249,6 +252,7 @@ export default function TableReservation(): JSX.Element {
 										<CustomCalendar startIso={tmpStart} endIso={tmpEnd} onSelect={(s,e) => { setTmpStart(s); setTmpEnd(e); applyRange(s,e); setCalOpen(false); }} onClose={() => setCalOpen(false)} />
 									)}
 								</div>
+								<LocationFilter value={locationIds} onChange={(ids) => setLocationIds(ids)} />
 
 								<input value={filters.phoneNumber} onChange={(e) => setFilters({ ...filters, phoneNumber: e.target.value })} placeholder="Phone number" className="h-9 px-3 rounded-lg border border-[#e8e9f3] bg-white text-sm text-[#0e101b]" />
 								<div className="flex-1" />
