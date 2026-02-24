@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Store {
 	_id: string;
