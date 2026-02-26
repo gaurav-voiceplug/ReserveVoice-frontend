@@ -8,11 +8,11 @@ export function statusBadge(status?: string) {
         case 'arriving soon':
         case 'arriving_soon':
         case 'more_info':
-            return 'bg-amber-50';
+            return 'bg-amber-100';
         case 'confirmed':
         case 'completed':
         case 'acknowledged':
-            return 'bg-green-50';
+            return 'bg-green-100';
         case 'cancelled':
         case 'canceled':
         case 'declined':
