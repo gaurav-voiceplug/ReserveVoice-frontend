@@ -35,7 +35,6 @@ const barHeights: number[] = Array.from({ length: BAR_COUNT }, (_, i) => {
 export default function AudioPlayer({
     audioRef,
     audioSrc,
-    audioError,
     duration,
     curTime,
     isPlaying,
