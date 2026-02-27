@@ -1,9 +1,10 @@
 import FAQ from './components/FAQs/FAQ';
 import LocationManagement from './components/location/LocationManagement';
-import OrdersOverview from './components/orders/OrdersOverview';
-
-import { Box, Calendar as CalendarIcon, CreditCard, MapPinCheck } from 'lucide-react';
-import TableReservation from './components/orders/TableReservation';
+import OrdersOverview from './components/transScripts/orders/OrdersOverview';
+import { Box, Calendar as CalendarIcon, CreditCard, MapPinCheck, Users } from 'lucide-react';
+import TableReservation from './components/transScripts/reservations/TableReservation';
+import UserManagement from './components/users/UserManagement';
+import AddUserPage from './components/users/AddUserPage';
 
 export const routes = [
     {
@@ -20,14 +21,19 @@ export const routes = [
         icon: <CalendarIcon className="w-5 h-5 text-black" />,
         showInSidebar: true,
     },
-    // {
-    //     index: true,
-    //     element: <div>Dashboard Home</div>,
-    //     label: 'Dashboard',
-    //     icon: <HomeIcon className="w-5 h-5" />, 
-    //     path: '',
-    //     showInSidebar: true,
-    // },
+    {
+         path: 'users',
+        element: <UserManagement />,
+        label: 'User Management',
+        icon: <Users className="w-6 h-6 text-black" />,
+        showInSidebar: true,
+    },
+    {
+        path: 'users/add',
+        element: <AddUserPage />,
+        label: 'Add User',
+        showInSidebar: false,
+    },
     {
         path: 'locations',
         element: <LocationManagement />,

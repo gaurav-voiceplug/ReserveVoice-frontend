@@ -78,9 +78,10 @@ const Login = () => {
                                 <input
                                     type="text"
                                     placeholder="Enter your username"
-                                    className={`form-input flex w-full rounded-lg text-[#0e101b] focus:outline-0 focus:ring-1 focus:ring-primary/20 border border-[#d1d3e6] bg-[#f8f9fb] focus:border-primary h-12 pl-12 pr-4 placeholder:text-[#505795] text-sm font-normal transition-all ${errors.username ? 'border-red-500' : ''}`}
+                                    className={`form-input flex w-full rounded-lg text-[#0e101b] focus:outline-0 bg-[#f8f9fb] h-12 pl-12 pr-4 placeholder:text-[#505795] text-sm font-normal transition-all ${errors.username ? 'border border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border border-[#d1d3e6] focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                                     {...register('username', {
                                         required: 'Username is required',
+                                        minLength: { value: 1, message: 'Username must be at least 1 character' },
                                         // pattern: {
                                         //     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                         //     message: 'Invalid username format',
@@ -101,7 +102,7 @@ const Login = () => {
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="Enter your password"
-                                    className={`form-input flex w-full rounded-lg text-[#0e101b] focus:outline-0 focus:ring-1 focus:ring-gray-700 border border-[#d1d3e6] bg-[#f8f9fb] focus:border-primary h-12 pl-12 pr-12 placeholder:text-[#505795] text-sm font-normal transition-all ${errors.password ? 'border-red-500' : ''}`}
+                                    className={`form-input flex w-full rounded-lg text-[#0e101b] focus:outline-0 bg-[#f8f9fb] h-12 pl-12 pr-12 placeholder:text-[#505795] text-sm font-normal transition-all ${errors.password ? 'border border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border border-[#d1d3e6] focus:border-primary focus:ring-1 focus:ring-gray-700'}`}
                                     {...register('password', {
                                         required: 'Password is required',
                                         minLength: { value: 1, message: 'Password must be at least 1 character' },

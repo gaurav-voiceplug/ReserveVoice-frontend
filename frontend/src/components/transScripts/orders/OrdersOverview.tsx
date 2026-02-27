@@ -1,13 +1,13 @@
 import axios, { type CancelToken } from 'axios';
 import { useEffect, useState, type JSX } from 'react';
-import client from '../../lib/axiosClient';
-import axiosInstance, { getAuthHeaders } from '../../utils/axiosInstance';
-import DataTable, { type Column } from '../common/DataTable';
-import DetailPanel from '../common/DetailPanel';
-import FilterBar, { type TabDef } from '../common/FilterBar';
-import PageHeader from '../common/PageHeader';
-import { useAudioPlayer } from '../common/useAudioPlayer';
-import { statusBadge, statusDot, statusLabel, statusText } from '../common/orderHelpers';
+import client from '../../../lib/axiosClient';
+import axiosInstance, { getAuthHeaders } from '../../../utils/axiosInstance';
+import DataTable, { type Column } from '../../common/DataTable';
+import DetailPanel from '../../common/DetailPanel';
+import FilterBar, { type TabDef } from '../../common/FilterBar';
+import PageHeader from '../../common/PageHeader';
+import { useAudioPlayer } from '../../common/useAudioPlayer';
+import { statusBadge, statusDot, statusLabel, statusText } from '../../common/orderHelpers';
 
 type ApiOrder = Record<string, any>;
 

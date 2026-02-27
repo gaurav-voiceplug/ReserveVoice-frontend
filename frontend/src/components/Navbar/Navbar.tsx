@@ -32,7 +32,7 @@ const Navbar: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
                 )}
             </div>
             {/* Nav Links */}
-            <nav className="flex-1 px-4 py-4 space-y-2 mt-2">
+            <nav className="flex-1 px-4 py-4 space-y-2">
                 {routes.filter(r => r.showInSidebar).map((link) => {
                     // compute full sidebar path at root (no /home prefix)
                     const fullPath = link.path ? (link.path.startsWith('/') ? `${link.path}` : `/${link.path}`) : '/';
@@ -43,15 +43,14 @@ const Navbar: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
                              key={link.label}
                              to={fullPath}
                              className={`
-                                 flex items-start gap-2 px-5 py-3 rounded-lg font-medium transition-colors
+                                 relative flex items-start gap-2 px-3 py-3 rounded-lg font-medium transition-all duration-200
                                  ${isActive ? 'bg-[#e8e9f3] text-blue-700' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'}
                                  ${sidebarOpen ? '' : 'justify-center'}
                              `}
                              aria-current={isActive ? 'page' : undefined}
                          >
                              {link.icon && React.cloneElement(link.icon, {
-                                 // force icon color to white when active, slate when not
-                                 className: `w-5 h-5 ${isActive ? 'text-blue-700' : 'text-slate-400'} transition-colors`,
+                                 className: `w-5 h-5 ${isActive ? 'text-blue-700' : 'text-slate-400'} transition-all duration-200`,
                             })}
                             {sidebarOpen && <span className="text-sm">{link.label}</span>}
                         </Link>
