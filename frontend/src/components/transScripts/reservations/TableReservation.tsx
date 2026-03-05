@@ -58,7 +58,7 @@ export default function TableReservation(): JSX.Element {
     const [error, setError] = useState<string | null>(null);
     const [tab, setTab] = useState<'Active' | 'Acknowledged'>('Active');
     const [selected, setSelected] = useState<Reservation | null>(null);
-    const [locationIds, setLocationIds] = useState<string[]>([]);
+    const [locationId, setLocationId] = useState<string>('');
     const [filters, setFilters] = useState(defaultFilters);
 
     const audio = useAudioPlayer();
@@ -98,7 +98,7 @@ export default function TableReservation(): JSX.Element {
         setLoading(true);
         setError(null);
         const headers = getAuthHeaders();
-        const body = { locationIds };
+        const body = { locationIds: locationId ? [locationId] : [] };
         Promise.all([
             fetchActiveTableReservations(headers, source.token, body),
             fetchAcknowledgedTableReservations(headers, source.token, body),
@@ -178,7 +178,7 @@ export default function TableReservation(): JSX.Element {
 
     const handleClearAll = () => {
         setFilters(defaultFilters);
-        setLocationIds([]);
+        setLocationId('');
     };
 
     // Detail panel rows for reservations
@@ -238,8 +238,8 @@ export default function TableReservation(): JSX.Element {
                     dateStart={filters.dateStart}
                     dateEnd={filters.dateEnd}
                     onDateRangeChange={(start, end) => setFilters((f) => ({ ...f, dateStart: start, dateEnd: end }))}
-                    locationIds={locationIds}
-                    onLocationChange={setLocationIds}
+                    locationId={locationId}
+                    onLocationChange={setLocationId}
                     phoneNumber={filters.phoneNumber}
                     onPhoneChange={(phone) => setFilters((f) => ({ ...f, phoneNumber: phone }))}
                     onClearAll={handleClearAll}

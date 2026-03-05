@@ -83,7 +83,7 @@ type CompletedFilters = {
     dateStart: string | null;
     dateEnd: string | null;
     phoneNumber: string;
-    locationIds?: string[];
+    locationId?: string;
 };
 
 const defaultCompletedFilters: CompletedFilters = {
@@ -92,7 +92,7 @@ const defaultCompletedFilters: CompletedFilters = {
     dateStart: null,
     dateEnd: null,
     phoneNumber: '',
-    locationIds: [],
+    locationId: '',
 };
 
 export default function OrdersOverview(): JSX.Element {
@@ -146,7 +146,7 @@ export default function OrdersOverview(): JSX.Element {
             dateStart: filters.dateStart ?? null,
             dateEnd: filters.dateEnd ?? null,
             phoneNumber: filters.phoneNumber ?? '',
-            locationIds: filters.locationIds ?? [],
+            locationIds: filters.locationId ? [filters.locationId] : [],
         };
         const cfg = buildAxiosConfig(headers, cancelToken);
 
@@ -186,7 +186,7 @@ export default function OrdersOverview(): JSX.Element {
             dateStart: completedFilters.dateStart ?? null,
             dateEnd: completedFilters.dateEnd ?? null,
             phoneNumber: completedFilters.phoneNumber ?? '',
-            locationIds: completedFilters.locationIds ?? [],
+            locationIds: completedFilters.locationId ? [completedFilters.locationId] : [],
         };
         const compPromise = axiosInstance
             .post('/orders/getCompletedOrder', compBody, { headers, cancelToken: source.token })
@@ -382,8 +382,8 @@ export default function OrdersOverview(): JSX.Element {
                     dateStart={completedFilters.dateStart}
                     dateEnd={completedFilters.dateEnd}
                     onDateRangeChange={handleDateRangeChange}
-                    locationIds={completedFilters.locationIds ?? []}
-                    onLocationChange={(ids) => setCompletedFilters((p) => ({ ...p, locationIds: ids }))}
+                    locationId={completedFilters.locationId ?? ''}
+                    onLocationChange={(id) => setCompletedFilters((p) => ({ ...p, locationId: id }))}
                     phoneNumber={completedFilters.phoneNumber}
                     onPhoneChange={(phone) => setCompletedFilters((p) => ({ ...p, phoneNumber: phone }))}
                     onClearAll={handleClearAll}

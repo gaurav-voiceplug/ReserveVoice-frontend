@@ -100,13 +100,11 @@ export default function AddUserPage(): JSX.Element {
 
                 {/* Top bar: back nav + title + step indicator */}
                 <div className="flex-shrink-0 flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                        <div>
-                            <h1 className="text-2xl font-bold text-[#100e1b] leading-tight">Add New User</h1>
-                            <p className="text-sm text-[#575095] mt-0.5">
-                                {step === 1 ? 'Enter personal details for the new user.' : 'Assign a role and location access.'}
-                            </p>
-                        </div>
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-2xl font-bold text-[#100e1b] leading-tight">Add New User</h1>
+                        <p className="text-sm text-[#575095] mt-0.5">
+                            {step === 1 ? 'Enter personal details for the new user.' : 'Assign a role and location access.'}
+                        </p>
                     </div>
                      <button
                         type="button"
@@ -155,27 +153,23 @@ export default function AddUserPage(): JSX.Element {
                                             <label className="block text-base font-semibold text-[#100e1b] mb-2">
                                                 First Name <span className="text-red-500">*</span>
                                             </label>
-                                            <div className="relative">
-                                                <input
-                                                    {...register('first_name', { required: 'First name is required' })}
-                                                    placeholder="Enter first name"
-                                                    className={inputClass(!!errors.first_name)}
-                                                />
-                                                {errors.first_name && <span className="absolute left-0 -bottom-5 text-xs text-red-500">{errors.first_name.message}</span>}
-                                            </div>
+                                            <input
+                                                {...register('first_name', { required: 'First name is required' })}
+                                                placeholder="Enter first name"
+                                                className={inputClass(!!errors.first_name)}
+                                            />
+                                            <p className="text-xs text-red-500 mt-1.5 h-4">{errors.first_name?.message ?? ''}</p>
                                         </div>
                                         <div>
                                             <label className="block text-base font-semibold text-[#100e1b] mb-2">
                                                 Last Name <span className="text-red-500">*</span>
                                             </label>
-                                            <div className="relative">
-                                                <input
-                                                    {...register('last_name', { required: 'Last name is required' })}
-                                                    placeholder="Enter last name"
-                                                    className={inputClass(!!errors.last_name)}
-                                                />
-                                                {errors.last_name && <span className="absolute left-0 -bottom-5 text-xs text-red-500">{errors.last_name.message}</span>}
-                                            </div>
+                                            <input
+                                                {...register('last_name', { required: 'Last name is required' })}
+                                                placeholder="Enter last name"
+                                                className={inputClass(!!errors.last_name)}
+                                            />
+                                            <p className="text-xs text-red-500 mt-1.5 h-4">{errors.last_name?.message ?? ''}</p>
                                         </div>
                                     </div>
 
@@ -183,18 +177,16 @@ export default function AddUserPage(): JSX.Element {
                                         <label className="block text-base font-semibold text-[#100e1b] mb-2">
                                             Email Address <span className="text-red-500">*</span>
                                         </label>
-                                        <div className="relative">
-                                            <input
-                                                {...register('email', {
-                                                    required: 'Email is required',
-                                                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email address' },
-                                                })}
-                                                type="email"
-                                                placeholder="user@example.com"
-                                                className={inputClass(!!errors.email)}
-                                            />
-                                            {errors.email && <span className="absolute left-0 -bottom-5 text-xs text-red-500">{errors.email.message}</span>}
-                                        </div>
+                                        <input
+                                            {...register('email', {
+                                                required: 'Email is required',
+                                                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email address' },
+                                            })}
+                                            type="email"
+                                            placeholder="user@example.com"
+                                            className={inputClass(!!errors.email)}
+                                        />
+                                        <p className="text-xs text-red-500 mt-1.5 h-4">{errors.email?.message ?? ''}</p>
                                     </div>
 
                                     <div>
@@ -218,8 +210,8 @@ export default function AddUserPage(): JSX.Element {
                                             >
                                                 {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                                             </button>
-                                            {errors.password && <span className="absolute left-0 -bottom-5 text-xs text-red-500">{errors.password.message}</span>}
                                         </div>
+                                        <p className="text-xs text-red-500 mt-1.5 h-4">{errors.password?.message ?? ''}</p>
                                     </div>
 
                                     <div>

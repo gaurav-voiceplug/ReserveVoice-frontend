@@ -129,12 +129,12 @@ export default function UserManagement(): JSX.Element {
     return (
         <div className="flex w-full bg-background-light h-[calc(100vh-1rem)] overflow-hidden">
             <div className="flex-1 min-h-0 flex flex-col gap-4 px-10 py-8 overflow-hidden">
-                <PageHeader title="User Management" subtitle={`${users.length} total users`}>
+                <PageHeader title="User Management" subtitle="Manage team members and their access levels.">
                     <button
-                        className="flex items-center gap-2 h-10 px-4 rounded-lg bg-[#2437e0] text-white text-sm font-bold hover:bg-[#1a2ab8] cursor-pointer"
+                        className="flex min-w-[140px] items-center justify-center gap-2 rounded-lg h-12 px-6 bg-blue-700 text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-blue-800 transition-all active:scale-95 cursor-pointer"
                         onClick={() => navigate('/users/add')}
                     >
-                        <UserPlus className="w-4 h-4" />
+                        <UserPlus className="w-5 h-5" />
                         Add New User
                     </button>
                 </PageHeader>

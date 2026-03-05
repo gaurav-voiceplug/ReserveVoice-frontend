@@ -1,10 +1,12 @@
-import FAQ from './components/FAQs/FAQ';
+import { Box, Calendar as CalendarIcon, CreditCard, MapPinCheck, Users } from 'lucide-react';
+import AddFAQPage from './components/FAQs/AddFAQPage';
+import FAQLibrary from './components/FAQs/FAQLibrary';
+import AddLocationPage from './components/location/AddLocationPage';
 import LocationManagement from './components/location/LocationManagement';
 import OrdersOverview from './components/transScripts/orders/OrdersOverview';
-import { Box, Calendar as CalendarIcon, CreditCard, MapPinCheck, Users } from 'lucide-react';
 import TableReservation from './components/transScripts/reservations/TableReservation';
-import UserManagement from './components/users/UserManagement';
 import AddUserPage from './components/users/AddUserPage';
+import UserManagement from './components/users/UserManagement';
 
 export const routes = [
     {
@@ -38,16 +40,28 @@ export const routes = [
         path: 'locations',
         element: <LocationManagement />,
         label: 'Location Management',
-        icon: <MapPinCheck className="w-6 h-6 text-black" />, 
+        icon: <MapPinCheck className="w-6 h-6 text-black" />,
         showInSidebar: true,
     },
     {
+        path: 'locations/add',
+        element: <AddLocationPage />,
+        label: 'Add Location',
+        showInSidebar: false,
+    },
+    {
         path: 'faqs',
-        element: <FAQ />,
+        element: <FAQLibrary />,
         label: 'FAQs',
-        icon: <CreditCard className="w-5 h-5 text-black" />, 
+        icon: <CreditCard className="w-5 h-5 text-black" />,
         showInSidebar: true,
     },
-    
+    {
+        path: 'faqs/add',
+        element: <AddFAQPage />,
+        label: 'Add FAQ',
+        showInSidebar: false,
+    },
+
     // Add more protected child routes here
 ];
