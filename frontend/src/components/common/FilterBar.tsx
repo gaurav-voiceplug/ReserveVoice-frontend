@@ -1,16 +1,17 @@
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, ChevronDown, RotateCcw, Search } from 'lucide-react';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { Calendar as CalendarIcon, RotateCcw, Search, Shield, Tag } from 'lucide-react';
+import { type ComponentType, useEffect, useRef, useState, type JSX } from 'react';
 import CustomCalendar from './CustomCalendar';
 import LocationFilter from './LocationFilter';
 
 type SelectOption = { value: string; label: string };
 
-function MultiSelectFilter({ label, options, values, onChange }: {
+function MultiSelectFilter({ label, options, values, onChange, icon: Icon }: {
     label: string;
     options: SelectOption[];
     values: string[];
     onChange: (values: string[]) => void;
+    icon: ComponentType<{ className?: string }>;
 }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -27,19 +28,28 @@ function MultiSelectFilter({ label, options, values, onChange }: {
         onChange(values.includes(val) ? values.filter((v) => v !== val) : [...values, val]);
 
     return (
-        <div ref={ref} className="relative">
+        <div ref={ref} className="relative min-w-[240px]">
             <button
                 type="button"
                 onClick={() => setOpen((s) => !s)}
-                className="h-11 px-3 min-w-[240px] rounded-lg text-sm flex items-center justify-between gap-1.5 border border-slate-200 bg-slate-50 text-slate-700 transition-all duration-200 focus:outline-none focus:border-gray-400 focus:shadow-sm"
+                className="w-full h-11 pl-10 pr-10 rounded-lg text-sm flex items-center border border-slate-200 bg-slate-50 text-slate-900 transition-all duration-200 focus:outline-none focus:border-gray-400 focus:shadow-sm"
             >
-                <span>{label}{values.length > 0 ? ` (${values.length})` : ''}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+                <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
+                <span className="truncate">{label}{values.length > 0 ? ` (${values.length})` : ''}</span>
+                <svg
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <path d="M7 15l5 5 5-5M7 9l5-5 5 5" />
+                </svg>
             </button>
             {open && (
-                <div className="absolute top-12 left-0 z-50 bg-white border border-slate-200 rounded-sm shadow-lg min-w-[240px] py-1">
+                <div className="absolute top-12 left-0 z-50 bg-white border border-slate-200 rounded-lg shadow-lg min-w-[240px] py-1">
                     {options.map((opt) => (
-                        <label key={opt.value} className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm text-[#0e101b]">
+                        <label key={opt.value} className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-slate-50 text-sm text-[#0e101b]">
                             <input
                                 type="checkbox"
                                 checked={values.includes(opt.value)}
@@ -168,6 +178,7 @@ export default function FilterBar({
                                     options={statusOptions}
                                     values={statusValues ?? []}
                                     onChange={onStatusChange}
+                                    icon={Tag}
                                 />
                             )}
 
@@ -178,6 +189,7 @@ export default function FilterBar({
                                     options={roleOptions}
                                     values={roleValues ?? []}
                                     onChange={onRoleChange}
+                                    icon={Shield}
                                 />
                             )}
 
