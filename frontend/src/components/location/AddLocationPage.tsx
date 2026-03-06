@@ -84,7 +84,7 @@ export default function AddLocationPage(): JSX.Element {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex items-center gap-6 pb-3">
+                <div className="flex items-center gap-6">
                     {TABS.map((tab) => (
                         <button
                             key={tab}
