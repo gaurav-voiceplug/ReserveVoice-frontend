@@ -84,12 +84,12 @@ export default function AddLocationPage(): JSX.Element {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex items-center gap-6 border-b border-gray-200 pb-3">
+                <div className="flex items-center gap-6 pb-3">
                     {TABS.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`text-sm font-semibold pb-2 transition-all ${
+                            className={`text-sm cursor-pointer font-semibold pb-2 transition-all ${
                                 activeTab === tab
                                     ? 'text-blue-700 border-b-2 border-blue-700'
                                     : 'text-gray-500 hover:text-blue-700'

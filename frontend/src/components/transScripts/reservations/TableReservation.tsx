@@ -58,7 +58,7 @@ export default function TableReservation(): JSX.Element {
     const [error, setError] = useState<string | null>(null);
     const [tab, setTab] = useState<'Active' | 'Acknowledged'>('Active');
     const [selected, setSelected] = useState<Reservation | null>(null);
-    const [locationId, setLocationId] = useState<string>('');
+    const [locationIds, setLocationIds] = useState<string[]>([]);
     const [filters, setFilters] = useState(defaultFilters);
 
     const audio = useAudioPlayer();
@@ -98,7 +98,7 @@ export default function TableReservation(): JSX.Element {
         setLoading(true);
         setError(null);
         const headers = getAuthHeaders();
-        const body = { locationIds: locationId ? [locationId] : [] };
+        const body = { locationIds };
         Promise.all([
             fetchActiveTableReservations(headers, source.token, body),
             fetchAcknowledgedTableReservations(headers, source.token, body),
@@ -178,7 +178,7 @@ export default function TableReservation(): JSX.Element {
 
     const handleClearAll = () => {
         setFilters(defaultFilters);
-        setLocationId('');
+        setLocationIds([]);
     };
 
     // Detail panel rows for reservations
@@ -228,7 +228,7 @@ export default function TableReservation(): JSX.Element {
     return (
         <div className="flex w-full bg-background-light h-[calc(100vh-1rem)] overflow-hidden gap-6">
             <div className={`flex-1 min-h-0 flex flex-col gap-4 px-10 py-8 overflow-hidden transition-all duration-300 ${selected ? 'mr-[380px]' : ''}`}>
-                <PageHeader title="Table Reservations" />
+                <PageHeader title="Table Reservations" subtitle="Manage incoming and acknowledged table reservations." />
 
                 <FilterBar
                     tabs={tabs}
@@ -238,8 +238,8 @@ export default function TableReservation(): JSX.Element {
                     dateStart={filters.dateStart}
                     dateEnd={filters.dateEnd}
                     onDateRangeChange={(start, end) => setFilters((f) => ({ ...f, dateStart: start, dateEnd: end }))}
-                    locationId={locationId}
-                    onLocationChange={setLocationId}
+                    locationIds={locationIds}
+                    onLocationChange={setLocationIds}
                     phoneNumber={filters.phoneNumber}
                     onPhoneChange={(phone) => setFilters((f) => ({ ...f, phoneNumber: phone }))}
                     onClearAll={handleClearAll}

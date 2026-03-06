@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, ChevronDown, Download, Search, SlidersHorizontal } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronDown, RotateCcw, Search } from 'lucide-react';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import CustomCalendar from './CustomCalendar';
 import LocationFilter from './LocationFilter';
@@ -31,7 +31,7 @@ function MultiSelectFilter({ label, options, values, onChange }: {
             <button
                 type="button"
                 onClick={() => setOpen((s) => !s)}
-                className={`h-11 px-3 min-w-[240px] rounded-lg text-sm flex items-center justify-between gap-1.5 border transition-all duration-200 ${values.length > 0 ? 'bg-primary/10 border-primary/30 text-primary font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                className="h-11 px-3 min-w-[240px] rounded-lg text-sm flex items-center justify-between gap-1.5 border border-slate-200 bg-slate-50 text-slate-700 transition-all duration-200 focus:outline-none focus:border-gray-400 focus:shadow-sm"
             >
                 <span>{label}{values.length > 0 ? ` (${values.length})` : ''}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
@@ -74,8 +74,8 @@ interface FilterBarProps {
     dateEnd?: string | null;
     onDateRangeChange?: (start: string | null, end: string | null) => void;
     /** Location filter — omit if not needed */
-    locationId?: string;
-    onLocationChange?: (id: string) => void;
+    locationIds?: string[];
+    onLocationChange?: (ids: string[]) => void;
     /** Phone filter — omit if not needed */
     phoneNumber?: string;
     onPhoneChange?: (phone: string) => void;
@@ -98,11 +98,10 @@ export default function FilterBar({
     tabs,
     activeTab,
     onTabChange,
-    loading = false,
     dateStart,
     dateEnd,
     onDateRangeChange,
-    locationId,
+    locationIds,
     onLocationChange,
     phoneNumber,
     onPhoneChange,
@@ -119,6 +118,13 @@ export default function FilterBar({
     const [calOpen, setCalOpen] = useState(false);
     const [tmpStart, setTmpStart] = useState<string | null>(dateStart ?? null);
     const [tmpEnd, setTmpEnd] = useState<string | null>(dateEnd ?? null);
+    const [resetSpinning, setResetSpinning] = useState(false);
+
+    const handleReset = () => {
+        setResetSpinning(true);
+        setTimeout(() => setResetSpinning(false), 400);
+        onClearAll?.();
+    };
 
     useEffect(() => { setTmpStart(dateStart ?? null); }, [dateStart]);
     useEffect(() => { setTmpEnd(dateEnd ?? null); }, [dateEnd]);
@@ -153,31 +159,7 @@ export default function FilterBar({
             {/* Filters row — only rendered if at least one filter is present */}
             {hasFilters && (
                 <div className="flex gap-4 flex-wrap items-center">
-                    {loading ? (
-                        <>
-                            {onNameChange && <div className="h-11 w-64 bg-gray-200 rounded-lg animate-pulse" />}
-                            {onStatusChange && <div className="h-11 w-40 bg-gray-200 rounded-lg animate-pulse" />}
-                            {onRoleChange && <div className="h-11 w-36 bg-gray-200 rounded-lg animate-pulse" />}
-                            {onDateRangeChange && <div className="h-11 w-40 bg-gray-200 rounded-lg animate-pulse" />}
-                            {onLocationChange && <div className="h-11 w-[240px] bg-gray-200 rounded-lg animate-pulse" />}
-                            {onPhoneChange && <div className="h-11 w-40 bg-gray-200 rounded-lg animate-pulse" />}
-                            <div className="flex-1" />
-                            {onClearAll && <div className="h-9 w-24 bg-gray-200 rounded-full animate-pulse" />}
-                        </>
-                    ) : (
-                        <>
-                            {/* Name search */}
-                            {onNameChange !== undefined && (
-                                <div className="relative flex-1 min-w-[260px]">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
-                                    <input
-                                        value={name ?? ''}
-                                        onChange={(e) => onNameChange(e.target.value)}
-                                        placeholder="Search by name or email"
-                                        className="w-full h-11 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-900 focus:ring-primary focus:border-primary outline-none placeholder:text-slate-400"
-                                    />
-                                </div>
-                            )}
+                    <>
 
                             {/* Status multiselect */}
                             {onStatusChange !== undefined && statusOptions && (
@@ -205,7 +187,7 @@ export default function FilterBar({
                                     <button
                                         type="button"
                                         onClick={() => setCalOpen((s) => !s)}
-                                        className="h-11 px-3 min-w-[240px] rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-900 flex items-center gap-2"
+                                        className="h-11 px-3 min-w-[240px] rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-900 flex items-center gap-2 transition-all focus:outline-none focus:border-gray-400 focus:shadow-sm"
                                     >
                                         <CalendarIcon className="w-4 h-4 text-slate-400" />
                                         <span className="text-sm font-medium">
@@ -233,9 +215,21 @@ export default function FilterBar({
                             {/* Location filter */}
                             {onLocationChange !== undefined && (
                                 <LocationFilter
-                                    value={locationId ?? ''}
+                                    value={locationIds ?? []}
                                     onChange={onLocationChange}
                                 />
+                            )}
+                             {/* Name search */}
+                        {onNameChange !== undefined && (
+                                <div className="relative flex-1 min-w-[260px]">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
+                                    <input
+                                        value={name ?? ''}
+                                        onChange={(e) => onNameChange(e.target.value)}
+                                        placeholder="Search by name or email"
+                                        className="w-full h-11 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-900 outline-none placeholder:text-slate-400 transition-all focus:border-gray-400 focus:shadow-sm"
+                                    />
+                                </div>
                             )}
 
                             {/* Phone filter */}
@@ -244,33 +238,25 @@ export default function FilterBar({
                                     value={phoneNumber ?? ''}
                                     onChange={(e) => onPhoneChange(e.target.value)}
                                     placeholder="Phone number"
-                                    className="h-11 min-w-[240px] px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                                    className="h-11 min-w-[240px] px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-900 outline-none placeholder:text-slate-400 transition-all focus:border-gray-400 focus:shadow-sm"
                                 />
                             )}
 
-                            <div className="flex-1" />
+                            {onNameChange === undefined && <div className="flex-1" />}
 
-                            {/* Clear All */}
+                            {/* Reset filters */}
                             {onClearAll !== undefined && (
+                                                    <div className="flex items-center gap-2 border-l border-slate-200 pl-4 h-8">
                                 <button
-                                    className="text-blue-600 text-sm font-semibold underline-offset-2 hover:underline"
-                                    onClick={(e) => { e.preventDefault(); onClearAll(); }}
+                                    title="Reset filters"
+                                    className="p-2 text-slate-500 hover:text-primary transition-colors cursor-pointer"
+                                    onClick={handleReset}
                                 >
-                                    Clear All
+                                    <RotateCcw className={`w-6 h-6 transition-transform duration-300 ease-in-out ${resetSpinning ? '-rotate-180' : 'rotate-0'}`} />
                                 </button>
+                                </div>
                             )}
-
-                            {/* View action icons */}
-                            <div className="flex items-center gap-1 border-l border-slate-200 pl-3">
-                                <button className="p-2 text-slate-500 hover:text-primary transition-colors rounded-md hover:bg-slate-100">
-                                    <SlidersHorizontal className="w-[22px] h-[22px]" />
-                                </button>
-                                <button className="p-2 text-slate-500 hover:text-primary transition-colors rounded-md hover:bg-slate-100">
-                                    <Download className="w-[22px] h-[22px]" />
-                                </button>
-                            </div>
                         </>
-                    )}
                 </div>
             )}
         </div>

@@ -46,10 +46,10 @@ export default function DetailPanel({
 
     return (
         <aside className="fixed right-0 top-0 bottom-0 w-[380px] border-l border-[#e8e9f3] bg-white overflow-hidden z-50">
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full px-6 pt-4">
 
                 {/* Fixed top: header + customer card + audio — never scrolls */}
-                <div className="flex-shrink-0 p-6 pb-3 space-y-4 border-b border-[#e8e9f3]">
+                <div className="flex-shrink-0 pb-3 space-y-4 border-b border-[#e8e9f3]">
                     {/* Header */}
                     <div className="flex items-start justify-between">
                         <div>
@@ -111,12 +111,12 @@ export default function DetailPanel({
                 </div>
 
                 {/* Scrollable zone: page-specific detail rows only */}
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:#d1d3e6_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#d1d3e6] [&::-webkit-scrollbar-thumb]:rounded-full">
+                <div className="flex-1 overflow-y-auto py-4 px-2 space-y-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {children}
                 </div>
 
                 {/* Footer — pinned, never scrolls */}
-                <div className="flex-shrink-0 border-t border-[#e8e9f3] bg-white p-6 grid grid-cols-2 gap-3">
+                <div className="flex-shrink-0 border-t border-[#e8e9f3] bg-white py-6 grid grid-cols-2 gap-3">
                     {loading ? (
                         <>
                             <div className="h-11 rounded-lg bg-gray-200 animate-pulse" />

@@ -83,7 +83,7 @@ type CompletedFilters = {
     dateStart: string | null;
     dateEnd: string | null;
     phoneNumber: string;
-    locationId?: string;
+    locationIds?: string[];
 };
 
 const defaultCompletedFilters: CompletedFilters = {
@@ -92,7 +92,7 @@ const defaultCompletedFilters: CompletedFilters = {
     dateStart: null,
     dateEnd: null,
     phoneNumber: '',
-    locationId: '',
+    locationIds: [],
 };
 
 export default function OrdersOverview(): JSX.Element {
@@ -146,7 +146,7 @@ export default function OrdersOverview(): JSX.Element {
             dateStart: filters.dateStart ?? null,
             dateEnd: filters.dateEnd ?? null,
             phoneNumber: filters.phoneNumber ?? '',
-            locationIds: filters.locationId ? [filters.locationId] : [],
+            locationIds: filters.locationIds ?? [],
         };
         const cfg = buildAxiosConfig(headers, cancelToken);
 
@@ -186,7 +186,7 @@ export default function OrdersOverview(): JSX.Element {
             dateStart: completedFilters.dateStart ?? null,
             dateEnd: completedFilters.dateEnd ?? null,
             phoneNumber: completedFilters.phoneNumber ?? '',
-            locationIds: completedFilters.locationId ? [completedFilters.locationId] : [],
+            locationIds: completedFilters.locationIds ?? [],
         };
         const compPromise = axiosInstance
             .post('/orders/getCompletedOrder', compBody, { headers, cancelToken: source.token })
@@ -372,7 +372,7 @@ export default function OrdersOverview(): JSX.Element {
     return (
         <div className="flex w-full bg-background-light h-[calc(100vh-1rem)] overflow-hidden gap-6">
             <div className={`flex-1 min-h-0 flex flex-col gap-4 px-10 py-8 overflow-hidden transition-all duration-300 ${selected ? 'mr-[380px]' : ''}`}>
-                <PageHeader title="Orders Overview" />
+                <PageHeader title="Orders Overview" subtitle="Manage and track live orders from your customers." />
 
                 <FilterBar
                     tabs={tabs}
@@ -382,8 +382,8 @@ export default function OrdersOverview(): JSX.Element {
                     dateStart={completedFilters.dateStart}
                     dateEnd={completedFilters.dateEnd}
                     onDateRangeChange={handleDateRangeChange}
-                    locationId={completedFilters.locationId ?? ''}
-                    onLocationChange={(id) => setCompletedFilters((p) => ({ ...p, locationId: id }))}
+                    locationIds={completedFilters.locationIds ?? []}
+                    onLocationChange={(ids) => setCompletedFilters((p) => ({ ...p, locationIds: ids }))}
                     phoneNumber={completedFilters.phoneNumber}
                     onPhoneChange={(phone) => setCompletedFilters((p) => ({ ...p, phoneNumber: phone }))}
                     onClearAll={handleClearAll}
